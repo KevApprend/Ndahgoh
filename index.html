@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>French Flashcards – Categorized</title>
+<title>Ndangoh Practice – Spaced Repetition</title>
 <style>
   :root{
     --card-w: 380px;
@@ -11,28 +11,11 @@
     --accent: #2b9cff;
     --muted: #6b7280;
   }
-  html,body{height:100%;margin:0;font-family:Inter,"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-  body{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(120deg,#f0f3ff,#fffaf0);
-    padding:24px;
-  }
+  html,body{height:100%;margin:0;font-family:Inter,Poppins,system-ui}
+  body{display:flex;align-items:center;justify-content:center;background:linear-gradient(120deg,#eef3ff,#fff8ea);padding:24px}
   .app{text-align:center;width:min(100%,900px)}
-  header{display:flex;gap:12px;align-items:center;justify-content:center;margin-bottom:20px}
-  .flag{width:72px;height:48px;border-radius:6px;border:1px solid #ddd;overflow:hidden;display:flex}
-  .flag div{flex:1}
-  .blue{background:#0055A4}.white{background:#fff}.red{background:#EF4135}
-  h1{font-size:1.4rem;margin:0;color:#222;font-weight:600}
-
-  #categorySelect{
-    padding:8px 12px;
-    font-size:1rem;
-    border-radius:8px;
-    border:1px solid #ccc;
-    margin-bottom:16px;
-  }
+  header{display:flex;gap:12px;align-items:center;justify-content:center;margin-bottom:16px}
+  h1{font-size:1.6rem;margin:0;color:#222;font-weight:700}
 
   #card{
     width:var(--card-w);height:var(--card-h);
@@ -41,133 +24,172 @@
     background:linear-gradient(180deg,#ffffff,#fbfdff);
     display:flex;align-items:center;justify-content:center;
     cursor:pointer;user-select:none;padding:18px;margin-inline:auto;
-    transition:transform .15s ease, box-shadow .15s ease;
+    transition:transform .15s ease;
+    margin-bottom:16px;
   }
   #card:active{transform:translateY(2px)}
-  .english{font-size:1.9rem;font-weight:700;color:#111}
-  .french{font-size:1.9rem;font-weight:700;color:#0b4a6f}
+  .english,.french{font-size:1.8rem;font-weight:700}
+  .english{color:#111}
+  .french{color:#0b4a6f}
 
-  .controls{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
-  button{padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
-  .btn-next{background:#f3f4f6;color:#111}
+  .controls{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+  button{padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600;font-size:1rem}
   .btn-random{background:var(--accent);color:#fff}
+  .btn-easy{background:#4caf50;color:white}
+  .btn-hard{background:#ff7043;color:white}
+
+  .meta{margin-top:12px;color:var(--muted);font-size:0.9rem}
 </style>
 </head>
 <body>
 <main class="app">
-  <header>
-    <div class="flag"><div class="blue"></div><div class="white"></div><div class="red"></div></div>
-    <h1>French Flashcards – Categorized</h1>
-  </header>
+  <header><h1>Ndangoh Practice</h1></header>
 
-  <select id="categorySelect"></select>
+  <div id="card"></div>
 
-  <section>
-    <div id="card"></div>
+  <div class="controls">
+    <button id="hardBtn" class="btn-hard">I need practice</button>
+    <button id="easyBtn" class="btn-easy">I knew it</button>
+    <button id="randomBtn" class="btn-random">Shuffle</button>
+  </div>
 
-    <div class="controls">
-      <button id="nextBtn" class="btn-next">➡️ Next</button>
-      <button id="randomBtn" class="btn-random">🔀 Shuffle</button>
-    </div>
-  </section>
+  <div id="meta" class="meta"></div>
 </main>
 
 <script>
-// Categorized vocabulary
-const categories = {
-  "Household Items": [
-    { french: "La table", english: "Table" },
-    { french: "La chaise", english: "Chair" },
-    { french: "La cuillère", english: "Spoon" },
-    { french: "La fourchette", english: "Fork" },
-    { french: "Le couteau", english: "Knife" },
-    { french: "L’assiette", english: "Plate" },
-    { french: "Le verre", english: "Glass" },
-    { french: "Le lit", english: "Bed" },
-    { french: "La natte", english: "Mat" },
-    { french: "Le drap", english: "Bed sheet" },
-    { french: "Le matelas", english: "Mattress" },
-    { french: "La couverture", english: "Blanket" },
-    { french: "L’oreiller", english: "Pillow" },
-    { french: "Le balaie", english: "Broom" },
-    { french: "Le seau", english: "Bucket" }
-  ],
+// Combine all items into one deck
+const items = [
+  { french:"La table", english:"Table" },
+  { french:"La chaise", english:"Chair" },
+  { french:"La cuillère", english:"Spoon" },
+  { french:"La fourchette", english:"Fork" },
+  { french:"Le couteau", english:"Knife" },
+  { french:"L’assiette", english:"Plate" },
+  { french:"Le verre", english:"Glass" },
+  { french:"Le lit", english:"Bed" },
+  { french:"La natte", english:"Mat" },
+  { french:"Le drap", english:"Bed sheet" },
+  { french:"Le matelas", english:"Mattress" },
+  { french:"La couverture", english:"Blanket" },
+  { french:"L’oreiller", english:"Pillow" },
+  { french:"Le balaie", english:"Broom" },
+  { french:"Le seau", english:"Bucket" },
+  { french:"Les vêtements", english:"Clothes" },
+  { french:"La chemise", english:"Shirt" },
+  { french:"Le pantalon", english:"Pants" },
+  { french:"La culotte", english:"Shorts" },
+  { french:"La robe", english:"Dress" },
+  { french:"La jupe", english:"Skirt" },
+  { french:"Le sac", english:"Bag" },
+  { french:"Les lunettes", english:"Eye glasses" },
+  { french:"Le cahier", english:"Notebook" },
+  { french:"Le livre", english:"Book" },
+  { french:"Le dictionnaire", english:"Dictionary" },
+  { french:"Le stylo", english:"Pen" },
+  { french:"Le crayon", english:"Pencil" },
+  { french:"La bicyclette", english:"Bike" },
+  { french:"Parlez-vous français?", english:"Do you speak French?" },
+  { french:"Je parle un peu français", english:"I speak a little French" },
+  { french:"Parlez lentement s’il vous plaît?", english:"Speak slowly please" },
+  { french:"Je ne comprends pas", english:"I don’t understand" },
+  { french:"Répétez s’il vous plaît!", english:"Please repeat" },
+  { french:"Qu’est-ce que vous dites?", english:"What did you say?" },
+  { french:"Je suis fatigué(e)", english:"I am tired" },
+  { french:"Je veux me reposer", english:"I want to rest" },
+  { french:"J’ai sommeil", english:"I am sleepy" },
+  { french:"Je veux dormir", english:"I want to sleep" },
+  { french:"J’ai faim", english:"I am hungry" },
+  { french:"J’ai soif", english:"I am thirsty" },
+  { french:"Je n’aime pas la viande", english:"I don’t like meat" },
+  { french:"Je suis végétarien(ne)", english:"I am vegetarian" },
+  { french:"Pourrais-je avoir un soda s’il vous plaît?", english:"Can I have a soda please?" },
+  { french:"Je suis malade", english:"I am sick" },
+  { french:"J’ai mal à la tête", english:"I have a headache" },
+  { french:"J’ai mal au ventre", english:"I have a stomach ache" },
+  { french:"Qu’est-ce que vous étudiez?", english:"What do you study?" },
+  { french:"J’étudie le Français", english:"I study French" },
+  { french:"Où est ce que vous travaillez ?", english:"Where do you work?" },
+  { french:"Je travaille au Corps de la Paix", english:"I work for the Peace Corps" },
+  { french:"Les ordinateurs coûtent cher en Afrique", english:"Computers are expensive in Africa" },
+  { french:"Les ordinateurs sont chers en Afrique", english:"Computers are expensive in Africa" },
+  { french:"L’Est", english:"The East" },
+  { french:"L’Ouest", english:"The West" },
+  { french:"Le Sud", english:"The South" },
+  { french:"Le Nord", english:"The North" },
+  { french:"A l’Est", english:"In the East" },
+  { french:"A l’Ouest", english:"In the West" },
+  { french:"Au Sud", english:"In the South" },
+  { french:"Au Nord", english:"In the North" },
+  { french:"Au Nord-Est", english:"In the North-East" },
+  { french:"Au Nord-Ouest", english:"In the North-West" },
+  { french:"Au Sud-Est", english:"In the South-East" },
+  { french:"Au Sud-Ouest", english:"In the South-West" },
+  { french:"Loin de", english:"Far from" },
+  { french:"Proche de", english:"Close to" },
+  { french:"A droite de", english:"To the right of" },
+  { french:"A gauche de", english:"To the left of" },
+  { french:"Vous allez tout droit", english:"You go straight" },
+  { french:"Vous tournez à gauche", english:"You turn left" },
+  { french:"Vous tournez à droite", english:"You turn right" },
+  { french:"Gao est loin de Bamako", english:"Gao is far from Bamako" },
+  { french:"Gao n’est pas proche de Bamako", english:"Gao is not close to Bamako" },
+  { french:"Gao est à 1000 km de Bamako", english:"Gao is 1000 km from Bamako" },
+  { french:"Je suis perdu", english:"I am lost" },
+  { french:"Excusez-moi Monsieur, où se trouve l’Ambassade américaine?", english:"Where is the American Embassy?" },
+  { french:"Où est le bureau du Corps de la Paix ?", english:"Where is the Peace Corps Office?" },
+  { french:"Quelle est la distance entre Bamako et Gao ?", english:"How far is Gao from Bamako?" }
+];
 
-  "Clothing Items": [
-    { french: "Les vêtements", english: "Clothes" },
-    { french: "La chemise", english: "Shirt" },
-    { french: "Le pantalon", english: "Pants" },
-    { french: "La culotte", english: "Shorts" },
-    { french: "La robe", english: "Dress" },
-    { french: "La jupe", english: "Skirt" },
-    { french: "Le sac", english: "Bag" },
-    { french: "Les lunettes", english: "Eye glasses" }
-  ],
+// Spaced repetition lightweight queue
+let queue = [...items];
+let index = 0;
+let showingFrench = false; // always show English first
 
-  "School Items": [
-    { french: "Le cahier", english: "Notebook" },
-    { french: "Le livre", english: "Book" },
-    { french: "Le dictionnaire", english: "Dictionary" },
-    { french: "Le stylo", english: "Pen" },
-    { french: "Le crayon", english: "Pencil" },
-    { french: "La bicyclette", english: "Bike" }
-  ],
+const card = document.getElementById('card');
+const meta = document.getElementById('meta');
 
-  "Everyday Phrases": [
-    { french: "Parlez-vous français?", english: "Do you speak French?" },
-    { french: "Je parle un peu français", english: "I speak a little bit French" },
-    { french: "Parlez lentement s’il vous plaît?", english: "Speak slowly please" },
-    { french: "Je ne comprends pas", english: "I don’t understand" },
-    { french: "Répétez s’il vous plaît!", english: "Please repeat" },
-    { french: "Qu’est-ce que vous dites?", english: "What did you say?" }
-  ],
+function render(){
+  if(queue.length === 0){
+    card.innerHTML = '<div class="english">All done!</div>';
+    meta.textContent = '';
+    return;
+  }
+  const item = queue[index];
+  card.innerHTML = showingFrench
+    ? `<div class="french">${item.french}</div>`
+    : `<div class="english">${item.english}</div>`;
 
-  "Health & Feelings": [
-    { french: "Je suis fatigué(e)", english: "I am tired" },
-    { french: "Je veux me reposer", english: "I want to rest" },
-    { french: "J’ai sommeil", english: "I am sleepy" },
-    { french: "Je veux dormir", english: "I want to sleep" },
-    { french: "J’ai faim", english: "I am hungry" },
-    { french: "J’ai soif", english: "I am thirsty" },
-    { french: "Je suis malade", english: "I am sick" },
-    { french: "J’ai mal à la tête", english: "I have a headache" },
-    { french: "J’ai mal au ventre", english: "I have a stomach ache" }
-  ],
+  meta.textContent = `${index+1} / ${queue.length}`;
+}
 
-  "Work & Study": [
-    { french: "Qu’est-ce que vous étudiez?", english: "What do you study?" },
-    { french: "J’étudie le Français", english: "I study French" },
-    { french: "Où est ce que vous travaillez ?", english: "Where do you work?" },
-    { french: "Je travaille au Corps de la Paix", english: "I work for the Peace Corps" }
-  ],
+function flip(){ showingFrench = !showingFrench; render(); }
 
-  "Technology & Costs": [
-    { french: "Les ordinateurs coûtent cher en Afrique", english: "Computers are expensive in Africa" },
-    { french: "Les ordinateurs sont chers en Afrique", english: "Computers are expensive in Africa" }
-  ],
+function markEasy(){
+  // If user knew it → move card to end
+  const cardData = queue.splice(index,1)[0];
+  queue.push(cardData);
+  index = 0;
+  showingFrench = false;
+  render();
+}
 
-  "Directions & Distance": [
-    { french: "L’Est", english: "The East" },
-    { french: "L’Ouest", english: "The West" },
-    { french: "Le Sud", english: "The South" },
-    { french: "Le Nord", english: "The North" },
-    { french: "A l’Est", english: "In the East" },
-    { french: "A l’Ouest", english: "In the West" },
-    { french: "Au Sud", english: "In the South" },
-    { french: "Au Nord", english: "In the North" },
-    { french: "Au Nord-Est", english: "In the North-East" },
-    { french: "Au Nord-Ouest", english: "In the North-West" },
-    { french: "Au Sud-Est", english: "In the South-East" },
-    { french: "Au Sud-Ouest", english: "In the South-West" },
-    { french: "Loin de", english: "Far from" },
-    { french: "Proche de", english: "Close to" },
-    { french: "A droite de", english: "To the right of" },
-    { french: "A gauche de", english: "To the left of" },
-    { french: "Vous allez tout droit", english: "You go straight" },
-    { french: "Vous tournez à gauche", english: "You turn left" },
-    { french: "Vous tournez à droite", english: "You turn right" },
-    { french: "Gao est loin de Bamako", english: "Gao is far from Bamako" },
-    { french: "Gao n’est pas proche de Bamako", english: "Gao is not close to Bamako" },
-    { french: "Gao est à 1000 km de Bamako", english: "Gao is 1000 km from Bamako" },
-    { french: "Je suis perdu", english: "I am lost" },
-    { french: "Excusez-moi Monsieur, où se trouve
+function markHard(){
+  // If user struggled → reinsert card near front
+  const cardData = queue.splice(index,1)[0];
+  queue.splice(1,0,cardData);
+  index = 0;
+  showingFrench = false;
+  render();
+}
+
+function shuffleQueue(){ queue.sort(() => Math.random() - 0.5); index=0; showingFrench=false; render(); }
+
+card.addEventListener('click', flip);
+document.getElementById('easyBtn').addEventListener('click', markEasy);
+document.getElementById('hardBtn').addEventListener('click', markHard);
+document.getElementById('randomBtn').addEventListener('click', shuffleQueue);
+
+render();
+</script>
+</body>
+</html>
